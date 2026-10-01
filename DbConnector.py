@@ -20,7 +20,7 @@ class DbConnector:
     def __init__(self,
              HOST="localhost",
              DATABASE="PortoTaxi",
-             USER="root",
+             USER="DaBest",
              PASSWORD=os.getenv("DB_PASSWORD")):
         # Connect to the database
         try:
