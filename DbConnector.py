@@ -18,7 +18,7 @@ class DbConnector:
     """
 
     def __init__(self,
-                 HOST="tdt4225-32.idi.ntnu.no",
+                 HOST="127.0.0.1",
                  DATABASE="PortoTaxi",
                  USER="DaBest",
                  PASSWORD=os.getenv("DB_PASSWORD")):
