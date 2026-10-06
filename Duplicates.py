@@ -5,6 +5,7 @@
 
 import pandas as pd
 from collections import Counter
+import csv
 
 Source_data = "data/porto.csv"
 Output_data = "data/porto_no_duplicates.csv"
@@ -27,9 +28,9 @@ for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksiz
     keep = ~(seen_before | duplicate_in_chunk)
     seen.update(hashes[keep])
     
-    chunk[keep].to_csv(Output_data, mode="w" if first else "a", header=first, index=False)
+    chunk[keep].to_csv(Output_data, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)
     
-    chunk[~keep].to_csv(REMOVED, mode="w" if first else "a", header=first, index=False)   # TODO
+    chunk[~keep].to_csv(REMOVED, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)   # TODO
 
     
     rows_in += len(chunk)
@@ -38,14 +39,17 @@ for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksiz
 print(f"Rows read: {rows_in}")
 print(f"Duplicate rows removed: {rows_in - rows_out}")
 print(f"Rows kept: {rows_out}")
+
+import os
+print(os.path.abspath(Output_data), os.path.getsize(Output_data))
+print(pd.read_csv(Output_data, dtype=str, nrows=5))
     
     
     
     
     
     
-    
-    
+"""
     
 #Duplicatd IDs 
 ids = pd.read_csv("data/porto.csv", usecols=["TRIP_ID"])
@@ -62,4 +66,5 @@ else:
     newdf = df.drop_duplicates() #Removes duplicated rows from the dataset wihtout modifying the origional datafile. 
     #print(f"Duplicated rows:{df[df.duplicated()]}")
     #print(f"HEI{newdf[newdf.duplicated()]}")
+    """
 
