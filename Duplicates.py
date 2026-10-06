@@ -18,6 +18,7 @@ REMOVED = "data/removed_duplicates.csv"
 seen = set()
 rows_in = 0
 rows_out = 0 
+next_id = 1
 first = True #TODO
 
 for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksize=200_000):
@@ -28,7 +29,14 @@ for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksiz
     keep = ~(seen_before | duplicate_in_chunk)
     seen.update(hashes[keep])
     
-    chunk[keep].to_csv(Output_data, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)
+    
+    kept = chunk[keep].copy()
+    kept["TRIP_ID"] = pd.RangeIndex(next_id, next_id + len(kept)).astype(str)
+    next_id += len(kept)
+    
+    kept.to_csv(Output_data, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)
+    
+    #chunk[keep].to_csv(Output_data, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)
     
     chunk[~keep].to_csv(REMOVED, mode="w" if first else "a", header=first, index=False, quoting=csv.QUOTE_ALL)   # TODO
 
@@ -39,11 +47,8 @@ for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksiz
 print(f"Rows read: {rows_in}")
 print(f"Duplicate rows removed: {rows_in - rows_out}")
 print(f"Rows kept: {rows_out}")
+print(f"Siste ID tildelt: {next_id-1}")
 
-import os
-print(os.path.abspath(Output_data), os.path.getsize(Output_data))
-print(pd.read_csv(Output_data, dtype=str, nrows=5))
-    
     
     
     
