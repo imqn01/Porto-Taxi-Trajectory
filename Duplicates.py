@@ -13,7 +13,7 @@ next_id = 1
 first = True #TODO
 
 for chunk in pd.read_csv(Source_data, dtype=str, keep_default_na=False, chunksize=200_000):
-    hashes = pd.util.hash_pandas_object(chunk, index=False) #TODO Hashing samme x -> y 
+    hashes = pd.util.hash_pandas_object(chunk, index=False)
     seen_before = hashes.isin(seen)
     duplicate_in_chunk = hashes.duplicated(keep="first")
     
