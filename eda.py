@@ -21,8 +21,12 @@ print('\nData types for each column:\n', df.dtypes)
 print(df.head())
 
 print(df['CALL_TYPE'].value_counts(dropna=False)) 
-print(df['MISSING_DATA'].value_counts(dropna=False))
 print(df['DAY_TYPE'].value_counts(dropna=False))
+
+print(df['ORIGIN_CALL'].nunique())
+print(df['ORIGIN_CALL'].value_counts(dropna=False))
+print(df['ORIGIN_STAND'].nunique())
+print(df['ORIGIN_STAND'].value_counts(dropna=False))
 
 # checks if original call and origin stand are set correctly
 #ORIGIN_CALL: ID of the client who initiated the call (only set when CALL_TYPE = ‘A’). Otherwise NULL
@@ -34,14 +38,18 @@ print(f"Number of rows with ORIGIN_STAND not set but CALL_TYPE is 'B': {(df['ORI
 
 print(f'Identical rows: {df.duplicated().sum()}')
 print(f"Number of duplicated TRIP_ID rows: {df['TRIP_ID'].duplicated().sum()}")
+duplicate_trip_ids = df[df['TRIP_ID'].duplicated(keep=False)]
+duplicate_trip_counts = duplicate_trip_ids.groupby('TRIP_ID').size().sort_values(ascending=False)
+print('Duplicated TRIP_IDs and frequence:\n', duplicate_trip_counts)
 
 df['POINT_COUNT'] = df['POLYLINE'].apply(count_points)
 duplicates = df[df['TRIP_ID'].duplicated(keep=False)]
 print(f"Number of distinct TRIP_IDs that appear more than once: {duplicates['TRIP_ID'].nunique()}")
 
-print(df['TRIP_ID'].nunique())
 print(df['TAXI_ID'].nunique())
+print(df['TAXI_ID'].value_counts(dropna=False))
 
+print(df['TRIP_ID'].nunique())
 
 # print columns that have different values for the same TRIP_ID
 for column in df.columns:
@@ -57,8 +65,8 @@ print(f"CALL_TYPE with the most GPS points: \n{most_pts['CALL_TYPE'].value_count
 
 # prints number of invalid trips
 print(f"Number of empty trajectories: {(df['POINT_COUNT'] == 0).sum()}")
-print(f"Number of trajectories between 1-2 GPS points: {((df['POINT_COUNT'] > 0) & (df['POINT_COUNT'] < 3)).sum()}")
 print(f"Number of points less than 3: {(df['POINT_COUNT'] < 3).sum()}")
+print("Minimum GPS points:", df['POINT_COUNT'].min(), "Maximum GPS points:", df['POINT_COUNT'].max())
 
 print(df['MISSING_DATA'].value_counts())
 print(df.loc[df['MISSING_DATA'] == True, ['TRIP_ID', 'CALL_TYPE', 'POINT_COUNT']].head(10))
