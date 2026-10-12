@@ -1,2 +1,7 @@
 .env
 \porto
+.venv
+.porto.csv
+data/
+*.csv
+.vscode
