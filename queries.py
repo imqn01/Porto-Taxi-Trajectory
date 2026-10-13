@@ -1,3 +1,5 @@
+import os
+
 from DbConnector import DbConnector
 from tabulate import tabulate
 
@@ -8,6 +10,8 @@ class PortoTaxiQueries:
         self.connection = DbConnector()
         self.db_connection = self.connection.db_connection
         self.cursor = self.connection.cursor
+        os.makedirs("results", exist_ok=True)
+        open("results/query_results.txt", "w").close()
 
     def show_table(self, query, title=None):
         self.cursor.execute(query)
@@ -21,6 +25,11 @@ class PortoTaxiQueries:
             centered_title = f"\033[1m{title.upper().center(table_width)}\033[0m"
             print(centered_title)
         print(table)
+
+    def save_results(self, title, rows, headers):
+        with open("results/query_results.txt", "a") as f:
+            f.write(f"\n{title}\n")
+            f.write(tabulate(rows, headers=headers, tablefmt="psql") + "\n")
 
     def task1(self):
         """1. How many taxis, trips, and total GPS points are there?"""
@@ -72,6 +81,11 @@ class PortoTaxiQueries:
             for taxi_id, call_type in most_used_call_type_per_taxi.items()
         ]
         self.print_table(table, headers=["Taxi ID", "Most used call type"])
+        self.save_results(
+            "Task 4a: most used call type per taxi",
+            table,
+            headers=["Taxi ID", "Most used call type"],
+        )
 
     def task4b(self):
         """4. b) For each call type, compute the average trip duration and distance,
@@ -107,7 +121,14 @@ class PortoTaxiQueries:
             GROUP BY taxi_id
             ORDER BY total_hours DESC
             """
-        self.show_table(query)
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        self.print_table(rows, headers=self.cursor.column_names)
+        self.save_results(
+            "Task 5: Taxis with the most total hours driven and total distance driven",
+            rows,
+            headers=self.cursor.column_names,
+        )
 
     def task6(self):
         """6. Find the trips that passed within 100 m of Porto City Hall. (longitude, latitude) = (-8.62911, 41.15794)"""
@@ -127,6 +148,11 @@ class PortoTaxiQueries:
         trips = self.cursor.fetchall()
         print(f"{len(trips)} passed within 100 m of Porto City Hall")
         self.print_table(trips[:20], ["Trip ID"])
+        self.save_results(
+            "Task 6: Trips that passed within 100 m of Porto City Hall",
+            trips,
+            ["Trip ID"],
+        )
 
     def task7(self):
         """7. Identify the number of invalid trips. An invalid trip is defined as a trip with fewer than 3 GPS points."""
@@ -158,6 +184,11 @@ class PortoTaxiQueries:
         midnight_crossers = self.cursor.fetchall()
         print(f"{len(midnight_crossers)} midnight crossers")
         self.print_table(midnight_crossers[:10], self.cursor.column_names)
+        self.save_results(
+            "Task 8: Midnight crossers trips",
+            midnight_crossers,
+            self.cursor.column_names,
+        )
 
     def task9(self):
         """9. Find the trips whose start and end points are within 50 m of each other (circular trips)."""
@@ -183,6 +214,9 @@ class PortoTaxiQueries:
         circular_trips = self.cursor.fetchall()
         print(f"{len(circular_trips)} circular trips")
         self.print_table(circular_trips[:20], self.cursor.column_names)
+        self.save_results(
+            "Task 9: Circular trips", circular_trips, self.cursor.column_names
+        )
 
     def task10(self):
         """10. For each taxi, compute the average idle time between consecutive trips.
